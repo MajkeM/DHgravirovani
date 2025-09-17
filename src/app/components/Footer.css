@@ -1,0 +1,21 @@
+.FOOTER {
+    position: relative;
+    backdrop-filter: blur(10px);
+    background: rgba(0, 0, 0, 0.1);
+    border-top: 1px solid rgb(99, 99, 99);
+    padding: 2rem 2rem;
+    margin-top: 10rem;
+}
+
+.FOOTER p {
+    text-align: center;
+    font-size: 1.2rem;
+    color: #ccc;
+    font-weight:lighter;
+    font-family: "Inter", sans-serif;
+}
+
+.FOOTER a {
+    color: rgb(104, 109, 255);
+    font-family: "Inter", sans-serif;
+}

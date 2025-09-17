@@ -1,26 +1,138 @@
-@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Comic+Neue:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&family=Crafty+Girls&family=Delius&family=Edu+SA+Hand:wght@400..700&family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&family=IBM+Plex+Sans:ital,wght@0,100..700;1,100..700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Jura:wght@300..700&family=Luxurious+Roman&family=Playwrite+CA:wght@100..400&family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&display=swap');
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@100;200;300;400&display=swap');
+
+
+
+/* ======================================================= */
+/*  REPLACE YOUR 'body' STYLE WITH THIS IN globals.css     */
+/* ======================================================= */
+html {
+  box-sizing: border-box;
+  scroll-behavior: smooth;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+*, *:before, *:after {
+  box-sizing: inherit;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: #000;
+  color: #fff;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+.VIDEO-BG {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+
+  filter: contrast(110%)
+
+
+
+
+}
+.uvod-con {
+  min-height: 95vh;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: flex-start;
+}
+.uvod-1 {
+  z-index: 1;
+  position: relative;
+  margin-left: 5%;
+  font-size:  clamp(5rem, 7vw, 15rem);
+  font-family: "Soviet", sans-serif;
+  font-weight:bolder;
+  color: #fff;
+  margin-bottom: 0;
+  text-align: left;
+  top: 2.8rem;
+}
+
+.uvod-2 {
+  z-index: 1;
+  position: relative;
+  margin-left: 5%;
+  top: 1.5rem;
+  font-size:  clamp(2.5rem, 2.8vw, 5rem);
+  font-family: "IBM Plex Mono", monospace;
+  font-weight:lighter;
+  color: #fff;
+  text-align: left;
+}
+
+.uvod-3{
+  z-index: 1;
+  position: relative;
+  margin-left: 5%;
+  font-size:  clamp(1rem, 1.5vw, 5rem);
+  font-family: "IBM Plex Mono", monospace;
+  font-weight:lighter;
+  color: #fff;
+  text-align: left;
+}
+
+.UVOD-last {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  align-items: center;
+}
+.uvod-kontakt {
+  /* --- Your existing styles --- */
+  position: relative;
+  margin-right: 5%;
+  font-size:  clamp(0.8rem, 1.2vw, 5rem);
+  font-family: "IBM Plex Mono", monospace;
+  font-weight:lighter;
+  color: #fff;
+  text-align: left;
+  border: 1px solid white;
+  border-radius: 10px;
+  text-decoration: none;
+  min-width: 150px;
+  text-align: center;
+  padding: 1%;
+
+  /* --- Recommended additions --- */
+
+  /* 1. Add padding to create space around the text */
+  
+  /* 2. Ensure it behaves like a block element */
+  display: inline-block;
+
+  /* 3. Change the cursor to a pointer on hover to show it's clickable */
+  cursor: pointer;
+
+  /* 4. Add a smooth transition for the hover effect */
+  transition: background-color 0.3s, color 0.3s;
+}
+
+/* 5. Add a hover effect for user feedback */
+.uvod-kontakt:hover {
+  background-color: white; /* Example: fill with white on hover */
+  color: black;             /* Example: make text black on hover */
+}
+
+.NEBO {
+  position: relative;
+  text-align: center;
+  font-family: "Inter", sans-serif;
+  font-size: 2rem;
+  color: white;
+  margin-top: 10%;
+  margin-bottom: 10%;
+  font-weight:bold;
+  text-align: center;
 }

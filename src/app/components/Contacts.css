@@ -1,0 +1,49 @@
+
+
+.CON-CONTACTS {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 10%;
+}
+
+.CON-CONTACTS h4 {
+    font-family: "IBM Plex Mono", sans-serif;
+    font-size: clamp(1rem, 1.5vw, 3rem);
+    margin: 0;
+    font-weight: lighter;
+    text-align: center;
+    color: white;
+}
+
+
+.CON-CONTACTS p {
+    font-family: "Inter", sans-serif;
+    font-size: clamp(1rem, 1.5vw, 3rem);
+    color: #ccc;
+    font-weight:bold;
+    text-align: center;
+}
+
+.CENTER {
+    border-left: 1px solid white;
+    border-right: 1px solid white;
+    padding: 0 6vw;
+    margin: 0 6vw;
+}
+
+
+.CON-CONTACTS img {
+    width: 2rem;
+    height: auto;
+    margin: 1rem 0;
+}
+
+.CON-CONTACTS div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+}
