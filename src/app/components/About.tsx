@@ -9,10 +9,6 @@ export default function About() {
                 <p className="ABOUT-TEXT-PARAGRAPH-2">Ať už hledáte originální dárek, dekoraci nebo zakázkový projekt, jsme tu pro vás. Každý kus je pro nás jedinečný – stejně jako váš příběh.</p>
             </div>
             <div className="ABOUT-IMAGE">
-                <p className="browser-warning">
-                If this looks wonky to you it's because this browser doesn't support the CSS
-                property 'aspect-ratio'.
-                </p>
 
                         <div className="image"><img className="img" src="./logo-white.png" alt="logo DH gravirovani" /></div>
 
