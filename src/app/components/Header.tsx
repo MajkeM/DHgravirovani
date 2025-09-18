@@ -67,7 +67,7 @@ export default function Header() {
         <Link href="/">
           <Image
             width={150}
-            height={75}
+            height={65}
             className="LOGO"
             src="/logo-white.png"
             alt="logo white DH - Gravirování"
