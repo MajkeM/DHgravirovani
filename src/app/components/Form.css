@@ -46,6 +46,7 @@ button {
   font-size: 20px;
   color: white;
   padding: 0.7em 1em;
+  min-width: 6rem ;
   padding-left: 0.9em;
   display: flex;
   align-items: center;

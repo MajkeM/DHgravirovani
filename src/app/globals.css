@@ -40,12 +40,14 @@ body {
 
 }
 .uvod-con {
-  min-height: 95vh;
+  min-height: 100vh;
   position: relative;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
   align-items: flex-start;
+  margin-bottom: 10vh;
+  padding: 0 0 5% 0;
 }
 .uvod-1 {
   z-index: 1;

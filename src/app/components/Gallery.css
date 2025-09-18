@@ -9,8 +9,7 @@
   font-size: 3rem;
   text-align: left;
     border-bottom: 1px solid white;
-    width: 15%;
-    margin-left: 10.5%;
+    width: 100%;
   font-family: "IBM Plex Mono", monospace;
   margin-bottom: 2rem;
   font-weight: lighter;
@@ -18,14 +17,14 @@
 
 .gallery-grid {
   column-count: 4;         /* kolik sloupců */
-  column-gap: 1rem;        /* mezera mezi sloupci */
+  column-gap: 2%;        /* mezera mezi sloupci */
   max-width: 1100px;
   margin: 0 auto;
 }
 
 .gallery-item {
   width: 100%;
-  margin-bottom: 1rem;     /* mezera mezi obrázky pod sebou */
+  margin-bottom: 10%;      /* mezera mezi obrázky pod sebou */
   border-radius: 8px;
   cursor: pointer;
   display: block;

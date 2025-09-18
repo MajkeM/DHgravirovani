@@ -20,7 +20,7 @@
 
 .CON-CONTACTS p {
     font-family: "Inter", sans-serif;
-    font-size: clamp(1rem, 1.5vw, 3rem);
+    font-size: clamp(0.8rem, 1.5vw, 3rem);
     color: #ccc;
     font-weight:bold;
     text-align: center;
