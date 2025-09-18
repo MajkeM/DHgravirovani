@@ -1,7 +1,6 @@
 "use client";
 import "./Header.css";
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 
 
@@ -65,9 +64,7 @@ export default function Header() {
         </div>
 
         <Link href="/">
-          <Image
-            width={150}
-            height={65}
+          <img
             className="LOGO"
             src="/logo-white.png"
             alt="logo white DH - Gravirování"
