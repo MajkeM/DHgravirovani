@@ -1,6 +1,9 @@
 "use client";
 import "./Header.css";
 import { useEffect, useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
+
 
 export default function Header() {
   const [scrollPosition, setScrollPosition] = useState(0);
@@ -61,13 +64,15 @@ export default function Header() {
           <a href="#kontakt">Kontakt</a>
         </div>
 
-        <a href="/">
-          <img
+        <Link href="/">
+          <Image
+            width={150}
+            height={75}
             className="LOGO"
-            src="./logo-white.png"
+            src="/logo-white.png"
             alt="logo white DH - Gravirování"
           />
-        </a>
+        </Link>
       </header>
     </div>
   );

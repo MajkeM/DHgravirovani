@@ -29,7 +29,7 @@ export default function Home() {
       window.removeEventListener("scroll", handleScroll);
     };
 
-  })
+  }, []);
 
   useEffect(() => {
     if (scrollPosition > 0){
@@ -54,7 +54,7 @@ export default function Home() {
       <div id="uvod"></div>
       <video 
         className = "VIDEO-BG"
-        src="./DH-intro-video.mp4"
+        src="/DH-intro-video.mp4"
         autoPlay
         loop
         muted
