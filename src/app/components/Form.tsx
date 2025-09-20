@@ -67,7 +67,7 @@ export default function ContactForm(): JSX.Element {
 
     emailjs
       .send(
-        "service_wqe8a2d",  // Váš Service ID
+        "service_52b4c7g",  // Váš Service ID
         "template_gwrc4ie", // Váš Template IDs
         form,
         "AeCNEjCDUi7-UaV7D"   // Váš Public Key
