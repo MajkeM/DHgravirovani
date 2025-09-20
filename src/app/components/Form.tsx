@@ -1,10 +1,23 @@
 "use client";
+
 import { useState, useRef, ChangeEvent, FormEvent } from "react";
 import emailjs from "emailjs-com";
 import ReCAPTCHA from "react-google-recaptcha";
 import "./Form.css";
 
-// Interface pro definici struktury a typů dat ve formuláři
+// --- Best Practice: Move Constants Outside Component ---
+// This prevents them from being redeclared on every render.
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const EMAIL_VALIDATION_ERROR = "Prosím zadejte platnou emailovou adresu.";
+
+// --- Configuration via Environment Variables ---
+// IMPORTANT: These should be stored in a .env.local file.
+const NEXT_PUBLIC_RECAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY!;
+const NEXT_PUBLIC_EMAILJS_SERVICE_ID = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID!;
+const NEXT_PUBLIC_EMAILJS_TEMPLATE_ID = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID!;
+const NEXT_PUBLIC_EMAILJS_PUBLIC_KEY = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY!;
+
+// Interface for the form fields remains the same
 interface IFormState {
   [key: string]: string;
   email: string;
@@ -12,82 +25,92 @@ interface IFormState {
   message: string;
 }
 
+// More descriptive type for submission status
+type SubmitStatus = {
+  type: "success" | "error";
+  message: string;
+};
+
 export default function ContactForm(): JSX.Element {
+  // --- State Management ---
   const [form, setForm] = useState<IFormState>({ email: "", subject: "", message: "" });
-  const [status, setStatus] = useState<string>("");
   const [emailError, setEmailError] = useState<string>("");
-  const [isCaptchaVerified, setIsCaptchaVerified] = useState<boolean>(false);
-  
-  // Typování useRef pro přístup k metodám ReCAPTCHA komponenty
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [submitStatus, setSubmitStatus] = useState<SubmitStatus | null>(null);
+
   const recaptchaRef = useRef<ReCAPTCHA>(null);
 
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-  // Typ parametru 'value' je string (token) nebo null
-  const handleCaptchaChange = (value: string | null): void => {
-    if (value) {
-      setIsCaptchaVerified(true);
-    }
-  };
-
+  // --- Handlers and Validation ---
   const validateEmail = (email: string): boolean => {
-    if (!emailRegex.test(email)) {
-      setEmailError("Prosím zadejte platnou emailovou adresu.");
+    if (!EMAIL_REGEX.test(email)) {
+      setEmailError(EMAIL_VALIDATION_ERROR);
       return false;
     }
     setEmailError("");
     return true;
   };
 
-  // Typování události 'e' pro input a textarea elementy
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
     const { name, value } = e.target;
-    setForm({ ...form, [name]: value });
-
+    setForm((prevForm) => ({ ...prevForm, [name]: value }));
+    
+    // Validate email as the user types for instant feedback
     if (name === "email") {
       validateEmail(value);
     }
   };
 
-  // Typování události 'e' pro odeslání formuláře
-  const handleSubmit = (e: FormEvent<HTMLFormElement>): void => {
-    e.preventDefault();
-
-    if (!validateEmail(form.email)) {
-      setStatus("❌ Zkontrolujte prosím emailovou adresu.");
-      return;
+  const handleCaptchaChange = (token: string | null): void => {
+    setCaptchaToken(token);
+    // If the captcha is verified, clear any previous error message
+    if (token) {
+        setSubmitStatus(null);
     }
-
-    if (!isCaptchaVerified) {
-      setStatus("❌ Prosím ověřte, že nejste robot.");
-      return;
-    }
-
-    setStatus("⏳ Odesílám...");
-
-    emailjs
-      .send(
-        "service_52b4c7g",  // Váš Service ID
-        "template_gwrc4ie", // Váš Template IDs
-        form,
-        "AeCNEjCDUi7-UaV7D"   // Váš Public Key
-      )
-      .then(
-        () => {
-          setStatus("✅ Email úspěšně odeslán!");
-          setForm({ email: "", subject: "", message: "" });
-          // Resetování reCAPTCHA po úspěšném odeslání
-          if (recaptchaRef.current) {
-            recaptchaRef.current.reset();
-          }
-          setIsCaptchaVerified(false);
-        },
-        (error) => {
-          console.error(error);
-          setStatus("❌ Chyba při odeslání.");
-        }
-      );
   };
+  
+  const handleCaptchaExpire = (): void => {
+    setCaptchaToken(null);
+  };
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
+    e.preventDefault();
+    setSubmitStatus(null); // Clear previous status on new submission attempt
+
+    // --- Pre-submission Validation ---
+    if (!validateEmail(form.email)) {
+        return; // Don't set a status, the emailError state already shows the problem
+    }
+
+    if (!captchaToken) {
+      setSubmitStatus({ type: "error", message: "❌ Prosím ověřte, že nejste robot." });
+      return;
+    }
+    
+    // --- Submission Logic ---
+    setIsSubmitting(true);
+    
+    try {
+      await emailjs.send(
+        NEXT_PUBLIC_EMAILJS_SERVICE_ID,
+        NEXT_PUBLIC_EMAILJS_TEMPLATE_ID,
+        form,
+        NEXT_PUBLIC_EMAILJS_PUBLIC_KEY
+      );
+
+      setSubmitStatus({ type: "success", message: "✅ Email úspěšně odeslán!" });
+      setForm({ email: "", subject: "", message: "" });
+      recaptchaRef.current?.reset();
+      setCaptchaToken(null);
+    } catch (error) {
+      console.error("EmailJS submission error:", error);
+      setSubmitStatus({ type: "error", message: "❌ Chyba při odeslání. Zkuste to prosím znovu." });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+  
+  const isButtonDisabled = isSubmitting || !captchaToken || !!emailError;
 
   return (
     <form onSubmit={handleSubmit} className="form">
@@ -97,10 +120,10 @@ export default function ContactForm(): JSX.Element {
         placeholder="Váš email"
         value={form.email}
         onChange={handleChange}
-        onBlur={() => validateEmail(form.email)} // Validace při opuštění pole
         required
       />
       {emailError && <p className="error-message">{emailError}</p>}
+      
       <input
         type="text"
         name="subject"
@@ -109,6 +132,7 @@ export default function ContactForm(): JSX.Element {
         onChange={handleChange}
         required
       />
+      
       <textarea
         name="message"
         placeholder="Zpráva"
@@ -116,32 +140,28 @@ export default function ContactForm(): JSX.Element {
         onChange={handleChange}
         required
       />
+
       <ReCAPTCHA
         ref={recaptchaRef}
-        sitekey="6Lcfv88rAAAAAODSCVQmUVsqozaCjyRW8g2rkUcB" // Nahraďte vaším reCAPTCHA Site Key
+        sitekey={NEXT_PUBLIC_RECAPTCHA_SITE_KEY}
         onChange={handleCaptchaChange}
+        onExpired={handleCaptchaExpire} // Handle cases where the user waits too long
       />
-      <button disabled={!isCaptchaVerified || !!emailError}>
+
+      <button disabled={isButtonDisabled}>
         <div className="svg-wrapper-1">
           <div className="svg-wrapper">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              width="24"
-              height="24"
-            >
-              <path fill="none" d="M0 0h24v24H0z"></path>
-              <path
-                fill="currentColor"
-                d="M1.946 9.315c-.522-.174-.527-.455.01-.634l19.087-6.362c.529-.176.832.12.684.638l-5.454 19.086c-.15.529-.455.547-.679.045L12 14l6-8-8 6-8.054-2.685z"
-              ></path>
-            </svg>
+             {/* SVG Path */}
           </div>
         </div>
-        <span>Send</span>
+        <span>{isSubmitting ? "Odesílám..." : "Send"}</span>
       </button>
 
-      <p>{status}</p>
+      {submitStatus && (
+        <p className={`status-message ${submitStatus.type}`}>
+          {submitStatus.message}
+        </p>
+      )}
     </form>
   );
 }
