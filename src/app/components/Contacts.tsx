@@ -8,17 +8,17 @@ export default function Contacts() {
             <div>
                 <img src="./email-icon.png" alt="" />
                 <h4>email</h4>
-                <p>dHgravirovani.cz</p>
+                <p>d.h.engraving@seznam.cz</p>
             </div>
             <div className="CENTER">
                 <img src="./telefon-icon.png" alt="" />
                 <h4>telefon</h4>
-                <p>123456789</p>
+                <p>+420 725 114 239</p>
             </div>
             <div>
                 <img src="./instagram-icon.png" alt="" />
                 <h4>Instagram</h4>
-                <p>123456789</p>
+                <p><a style={{textDecoration: "none", color: "white"}} target="_blank" href="https://www.instagram.com/d.h.gravirovani/">d.h.gravirovani</a></p>
             </div>
         </div>
     )
