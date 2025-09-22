@@ -5,12 +5,14 @@ import Image from "next/image";
 import "./globals.css";
 import About from "./components/About";
 import Services from "./components/Services";
-import { useState, useEffect, useRef } from "react"; // Uistite sa, že máte useRef
+import { useState, useEffect, useRef } from "react";
 import Gallery from "./components/Gallery";
 import Contacts from "./components/Contacts";
 import Form from "./components/Form";
 import Footer from "./components/Footer";
 import Intro from "./components/Intro";
+// KROK 3.1: Importujeme nas novy hook
+import { useAnimationOnScroll } from "./hooks/useAnimationOnScroll";
 
 export default function Home() {
   const [blur, setBlur] = useState(0);
@@ -19,11 +21,19 @@ export default function Home() {
   const [background, setBackground] = useState("none");
   const [isLoading, setIsLoading] = useState(true); 
   const [introAnimationClass, setIntroAnimationClass] = useState(""); 
+
+  // --- OBSERVER PRO ANIMACE ---
+  // KROK 3.2: Vytvorime instanci hooku pro kazdou sekci
+  const [aboutRef, isAboutVisible] = useAnimationOnScroll<HTMLDivElement>();
+  const [servicesRef, isServicesVisible] = useAnimationOnScroll<HTMLDivElement>();
+  const [galleryRef, isGalleryVisible] = useAnimationOnScroll<HTMLDivElement>();
+  const [contactsRef, isContactsVisible] = useAnimationOnScroll<HTMLDivElement>();
+  const [formRef, isFormVisible] = useAnimationOnScroll<HTMLDivElement>();
   
-  // 1. Vytvoríme referenciu pre video element
+  
+  // Ref pre video zustava
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  // ... (useEffect pre scroll a background zostávajú rovnaké)
   useEffect(() => {
     const handleScroll = () => setScrollPosition(window.scrollY);
     window.addEventListener("scroll", handleScroll);
@@ -42,37 +52,26 @@ export default function Home() {
     }
   }, [scrollPosition]);
   
-  // 2. Nový useEffect, ktorý riadi intro na základe načítania videa
   useEffect(() => {
     const videoElement = videoRef.current;
-
     const handleVideoReady = () => {
-      // Keď je video pripravené, spustíme animáciu miznutia
       setIntroAnimationClass("effect-fadeout");
-      
-      // A po skončení animácie (2 sekundy) odstránime komponent
-      setTimeout(() => {
-        setIsLoading(false);
-      }, 2000); // Dĺžka CSS animácie
+      setTimeout(() => setIsLoading(false), 2000);
     };
 
     if (videoElement) {
-      // Poistka: Ak je video už načítané z cache, spustíme funkciu hneď
-      if (videoElement.readyState >= 3) { // 3 = HAVE_FUTURE_DATA, 4 = HAVE_ENOUGH_DATA
+      if (videoElement.readyState >= 3) {
         handleVideoReady();
       } else {
-        // Inak pridáme event listener, ktorý počká na udalosť 'canplaythrough'
         videoElement.addEventListener('canplaythrough', handleVideoReady);
       }
     }
-
-    // Funkcia na upratanie: odstráni listener, keď sa komponent odpojí
     return () => {
       if (videoElement) {
         videoElement.removeEventListener('canplaythrough', handleVideoReady);
       }
     };
-  }, []); // Spustí sa iba raz po prvom renderovaní
+  }, []);
 
 
   return (
@@ -80,7 +79,6 @@ export default function Home() {
       {isLoading && <Intro animationClass={introAnimationClass} />}
       <div id="uvod"></div>
       
-      {/* 3. Prepojíme ref s video elementom */}
       <video 
         ref={videoRef}
         className = "VIDEO-BG"
@@ -101,18 +99,34 @@ export default function Home() {
         </div>
       </div>
       
-      {/* ... (zvyšok stránky) ... */}
-      <div id = "o-nas"></div>
-      <About />
-      <div id = "sluzby"></div>
-      <Services />
-      <div id = "galerie"></div>
-      <Gallery />
-      <div id = "kontakt"></div>
-      <Contacts />
+      {/* KROK 3.3: Obalime komponenty a priradime refy a tridy */}
+      <div id="o-nas"></div>
+      <div ref={aboutRef} className={`hidden-element ${isAboutVisible ? 'visible-element' : ''}`}>
+        <About />
+      </div>
+
+      <div id="sluzby"></div>
+      <div ref={servicesRef} className={`hidden-element ${isServicesVisible ? 'visible-element' : ''}`}>
+        <Services />
+      </div>
+
+      <div id="galerie"></div>
+      <div ref={galleryRef} className={`hidden-element ${isGalleryVisible ? 'visible-element' : ''}`}>
+        <Gallery />
+      </div>
+      
+      <div id="kontakt"></div>
+      <div ref={contactsRef} className={`hidden-element ${isContactsVisible ? 'visible-element' : ''}`}>
+        <Contacts />
+      </div>
+
       <p className = "NEBO">NEBO</p>
+      
       <div id ="form"></div>
-      <Form />
+      <div ref={formRef} className={`hidden-element ${isFormVisible ? 'visible-element' : ''}`}>
+        <Form />
+      </div>
+      
       <Footer />
     </div>
   );

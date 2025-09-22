@@ -24,6 +24,22 @@ body {
   overflow-x: hidden;
 }
 
+
+/* --- CSS pro animace pri scrollu --- */
+
+/* Vychozi stav pro kazdy animovany prvek */
+.hidden-element {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 1.5s ease-out, transform 0.6s ease-out;
+}
+
+/* Trida, ktera se prida, kdyz je prvek viditelny */
+.visible-element {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 .VIDEO-BG {
   position: fixed;
   top: 0;
