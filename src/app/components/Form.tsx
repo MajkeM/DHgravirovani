@@ -1,167 +1,150 @@
 "use client";
-
 import { useState, useRef, ChangeEvent, FormEvent } from "react";
 import emailjs from "emailjs-com";
 import ReCAPTCHA from "react-google-recaptcha";
-import "./Form.css";
+import "./Form.css"; // Ujistěte se, že máte tento soubor se styly
 
-// --- Best Practice: Move Constants Outside Component ---
-// This prevents them from being redeclared on every render.
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const EMAIL_VALIDATION_ERROR = "Prosím zadejte platnou emailovou adresu.";
-
-// --- Configuration via Environment Variables ---
-// IMPORTANT: These should be stored in a .env.local file.
-const NEXT_PUBLIC_RECAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY!;
-const NEXT_PUBLIC_EMAILJS_SERVICE_ID = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID!;
-const NEXT_PUBLIC_EMAILJS_TEMPLATE_ID = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID!;
-const NEXT_PUBLIC_EMAILJS_PUBLIC_KEY = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY!;
-
-// Interface for the form fields remains the same
-interface IFormState {
-  [key: string]: string;
-  email: string;
-  subject: string;
-  message: string;
-}
-
-// More descriptive type for submission status
-type SubmitStatus = {
-  type: "success" | "error";
-  message: string;
+// --- Regex pro validaci ---
+const validateEmail = (email: string) => {
+  // Základní regex pro kontrolu formátu emailu
+  const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return re.test(String(email).toLowerCase());
 };
 
-export default function ContactForm(): JSX.Element {
-  // --- State Management ---
-  const [form, setForm] = useState<IFormState>({ email: "", subject: "", message: "" });
-  const [emailError, setEmailError] = useState<string>("");
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [submitStatus, setSubmitStatus] = useState<SubmitStatus | null>(null);
+export default function Form() {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    message: "",
+  });
 
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [status, setStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
   const recaptchaRef = useRef<ReCAPTCHA>(null);
 
-  // --- Handlers and Validation ---
-  const validateEmail = (email: string): boolean => {
-    if (!EMAIL_REGEX.test(email)) {
-      setEmailError(EMAIL_VALIDATION_ERROR);
-      return false;
-    }
-    setEmailError("");
-    return true;
-  };
-
-  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setForm((prevForm) => ({ ...prevForm, [name]: value }));
-    
-    // Validate email as the user types for instant feedback
-    if (name === "email") {
-      validateEmail(value);
-    }
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
-  const handleCaptchaChange = (token: string | null): void => {
-    setCaptchaToken(token);
-    // If the captcha is verified, clear any previous error message
-    if (token) {
-        setSubmitStatus(null);
+  const validate = () => {
+    let tempErrors: { [key: string]: string } = {};
+    if (!formData.name.trim()) tempErrors.name = "Jméno je povinné.";
+    if (!formData.email.trim()) {
+        tempErrors.email = "Email je povinný.";
+    } else if (!validateEmail(formData.email)) {
+        tempErrors.email = "Zadejte prosím platný email.";
     }
-  };
-  
-  const handleCaptchaExpire = (): void => {
-    setCaptchaToken(null);
+    if (!formData.message.trim()) tempErrors.message = "Zpráva je povinná.";
+
+    const token = recaptchaRef.current?.getValue();
+    if (!token) {
+        tempErrors.recaptcha = "Prosím, potvrďte, že nejste robot.";
+    }
+
+    setErrors(tempErrors);
+    // Vrací true, pokud v objektu s chybami nejsou žádné klíče (žádné chyby)
+    return Object.keys(tempErrors).length === 0;
   };
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setSubmitStatus(null); // Clear previous status on new submission attempt
 
-    // --- Pre-submission Validation ---
-    if (!validateEmail(form.email)) {
-        return; // Don't set a status, the emailError state already shows the problem
-    }
-
-    if (!captchaToken) {
-      setSubmitStatus({ type: "error", message: "❌ Prosím ověřte, že nejste robot." });
+    if (!validate()) {
+      setStatus("error");
       return;
     }
     
-    // --- Submission Logic ---
-    setIsSubmitting(true);
-    
-    try {
-      await emailjs.send(
-        NEXT_PUBLIC_EMAILJS_SERVICE_ID,
-        NEXT_PUBLIC_EMAILJS_TEMPLATE_ID,
-        form,
-        NEXT_PUBLIC_EMAILJS_PUBLIC_KEY
-      );
+    setStatus("sending");
 
-      setSubmitStatus({ type: "success", message: "✅ Email úspěšně odeslán!" });
-      setForm({ email: "", subject: "", message: "" });
-      recaptchaRef.current?.reset();
-      setCaptchaToken(null);
-    } catch (error) {
-      console.error("EmailJS submission error:", error);
-      setSubmitStatus({ type: "error", message: "❌ Chyba při odeslání. Zkuste to prosím znovu." });
-    } finally {
-      setIsSubmitting(false);
-    }
+     const token = recaptchaRef.current?.getValue();
+    
+    const templateParams = {
+        name: formData.name,
+        email: formData.email,
+        message: formData.message,
+        'g-recaptcha-response': token 
+    };
+    
+    // Zadejte své údaje z EmailJS
+    emailjs.send(
+        process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID!, // Vaše Service ID
+        process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID!, // Vaše Template ID
+        templateParams,
+        process.env.NEXT_PUBLIC_EMAILJS_USER_ID!     // Váš User ID (Public Key)
+      )
+      .then(
+        (response) => {
+          console.log("SUCCESS!", response.status, response.text);
+          setStatus("success");
+          // Reset formuláře po úspěchu
+          setFormData({ name: "", email: "", message: "" });
+          recaptchaRef.current?.reset();
+        },
+        (error) => {
+          console.error("FAILED...", error);
+          setStatus("error");
+          setErrors(prev => ({...prev, form: "Odeslání selhalo. Zkuste to prosím znovu."}))
+        }
+      );
   };
-  
-  const isButtonDisabled = isSubmitting || !captchaToken || !!emailError;
 
   return (
-    <form onSubmit={handleSubmit} className="form">
-      <input
-        type="email"
-        name="email"
-        placeholder="Váš email"
-        value={form.email}
-        onChange={handleChange}
-        required
-      />
-      {emailError && <p className="error-message">{emailError}</p>}
-      
-      <input
-        type="text"
-        name="subject"
-        placeholder="Služba / Otázka"
-        value={form.subject}
-        onChange={handleChange}
-        required
-      />
-      
-      <textarea
-        name="message"
-        placeholder="Zpráva"
-        value={form.message}
-        onChange={handleChange}
-        required
-      />
+    <form onSubmit={handleSubmit} noValidate>
+      <div className="form-group">
+        <label htmlFor="name">Předmět</label>
+        <input
+          type="text"
+          name="name"
+          id="name"
+          value={formData.name}
+          onChange={handleChange}
+        />
+        {errors.name && <p className="error-text">{errors.name}</p>}
+      </div>
 
-      <ReCAPTCHA
-        ref={recaptchaRef}
-        sitekey={NEXT_PUBLIC_RECAPTCHA_SITE_KEY}
-        onChange={handleCaptchaChange}
-        onExpired={handleCaptchaExpire} // Handle cases where the user waits too long
-      />
+      <div className="form-group">
+        <label htmlFor="email">Email</label>
+        <input
+          type="email"
+          name="email"
+          id="email"
+          value={formData.email}
+          onChange={handleChange}
+        />
+        {errors.email && <p className="error-text">{errors.email}</p>}
+      </div>
 
-      <button disabled={isButtonDisabled}>
-        <div className="svg-wrapper-1">
-          <div className="svg-wrapper">
-             {/* SVG Path */}
-          </div>
-        </div>
-        <span>{isSubmitting ? "Odesílám..." : "Send"}</span>
+      <div className="form-group">
+        <label htmlFor="message">Vaše zpráva</label>
+        <textarea
+          name="message"
+          id="message"
+          rows={5}
+          value={formData.message}
+          onChange={handleChange}
+        />
+        {errors.message && <p className="error-text">{errors.message}</p>}
+      </div>
+
+      <div className="recaptcha-container">
+        <ReCAPTCHA
+            ref={recaptchaRef}
+            sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY!} // Nahraďte vaším "Site Key"
+        />
+        {errors.recaptcha && <p className="error-text">{errors.recaptcha}</p>}
+      </div>
+
+
+      <button type="submit" disabled={status === "sending"}>
+        {status === "sending" ? "Odesílám..." : "Odeslat zprávu"}
       </button>
 
-      {submitStatus && (
-        <p className={`status-message ${submitStatus.type}`}>
-          {submitStatus.message}
-        </p>
-      )}
+      {status === "success" && <p className="success-message">Děkujeme! Vaše zpráva byla úspěšně odeslána.</p>}
+      {errors.form && <p className="error-text">{errors.form}</p>}
     </form>
   );
 }
