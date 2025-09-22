@@ -30,11 +30,11 @@ export default function Header() {
     <div>
       {/* MENU */}
       <div className={`MENU ${open ? "show" : ""}`}>
-        <a href="#uvod">Domů</a>
-        <a href="#o-nas">O nás</a>
-        <a href="#sluzby">Služby</a>
-        <a href="#galerie">Galerie</a>
-        <a href="#kontakt">Kontakt</a>
+        <a onClick={() => setOpen(false)} href="#uvod">Domů</a>
+        <a onClick={() => setOpen(false)} href="#o-nas">O nás</a>
+        <a onClick={() => setOpen(false)} href="#sluzby">Služby</a>
+        <a onClick={() => setOpen(false)} href="#galerie">Galerie</a>
+        <a onClick={() => setOpen(false)} href="#kontakt">Kontakt</a>
       </div>
 
       {/* HEADER */}
